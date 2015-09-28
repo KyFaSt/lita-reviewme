@@ -25,27 +25,34 @@ ENV["GITHUB_WOLFBRAIN_ACCESS_TOKEN"]
 
 ## Usage
 
-### See who is in the review rotation.
+### Add a review group
 
-> **Jay H.** Nerdbot: reviewers
+> **Kylie S.** Nerdbot: create backend, reviewers: iamvery, zacstewart
+>
+> **Nerdbot** created group backend with reviewers iamvery, zacstewart
+
+
+### See who is in a group's review rotation.
+
+> **Jay H.** Nerdbot: reviewers backend
 >
 > **Nerdbot** iamvery, zacstewart, ...
 
 ### Add a name to the review rotation
 
-> **Jay H.** Nerdbot: add kyfast to reviews
+> **Jay H.** Nerdbot: add kyfast to web
 >
-> **Nerdbot** added kyfast to reviews
+> **Nerdbot** added kyfast to web
 
 ### Remove a name from the review rotation
 
-> **Jay H.** Nerdbot: remove kyfast from reviews
+> **Jay H.** Nerdbot: remove kyfast from web
 >
-> **Nerdbot** removed kyfast from reviews
+> **Nerdbot** removed kyfast from web
 
 ### Fetch the next reviewer
 
-> **Jay H.** Nerdbot: review me
+> **Jay H.** Nerdbot: review me backend
 >
 > **Nerdbot** iamvery
 
@@ -54,7 +61,7 @@ This will post a comment mentioning the next reviewer on the referenced Github
 pull request or issue. In order for this to work, @wolfbrain must have access
 to the repository.
 
-> **Jay H.** Nerdbot: review https://github.com/iamvery/lita-reviewme/issues/7
+> **Jay H.** Nerdbot: review backend https://github.com/iamvery/lita-reviewme/issues/7
 >
 > **Nerdbot** iamvery should be on it...
 

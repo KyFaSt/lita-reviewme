@@ -14,6 +14,14 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
 
   let(:reply) { replies.last }
 
+  describe "#create_team" do
+    it "creates the team as a redis list" do
+      send_command("create team backend, reviewers: one, two, three")
+
+      expect(reply).to eq("created team backend with reviewers one, two, three")
+    end
+  end
+
   describe "#add_reviewer" do
     describe "when the review team exists" do
       before do

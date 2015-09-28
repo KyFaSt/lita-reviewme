@@ -8,13 +8,7 @@ module Lita
         /add (?<reviewer>.+) to (?<team>.+)/i,
         :add_reviewer,
         command: true,
-      )
-
-      route(
-        /add reviewer (?<reviewer>.+)/i,
-        :add_reviewer,
-        command: true,
-        help: { "add reviewer iamvery" => "adds iamvery to the reviewer rotation" },
+        help: { "add reviewer iamvery to backend" => "adds iamvery to the backend reviewer rotation" },
       )
 
       route(
@@ -28,20 +22,14 @@ module Lita
         /remove (?<reviewer>.+) from (?<team>.+)/i,
         :remove_reviewer,
         command: true,
-      )
-
-      route(
-        /remove reviewer (?<reviewer>.+)/i,
-        :remove_reviewer,
-        command: true,
-        help: { "remove reviewer iamvery" => "removes iamvery from the reviewer rotation" },
+        help: { "remove reviewer iamvery from backend" => "removes iamvery from the backend reviewer rotation" },
       )
 
       route(
         /reviewers (?<team>.+)/i,
         :display_reviewers,
         command: true,
-        help: { "reviewers" => "display list of reviewers" },
+        help: { "reviewers backend" => "display list of reviewers in backend group" },
       )
 
       route(
@@ -55,21 +43,21 @@ module Lita
         /review me (?<team>.+)/i,
         :generate_assignment,
         command: true,
-        help: { "review me" => "responds with the next reviewer" },
+        help: { "review me backend" => "responds with the next reviewer in the backend rotation" },
       )
 
       route(
         %r{review (?<team>.+) <?(?<url>(https://)?github.com/(?<repo>.+)/(pull|issues)/(?<id>\d+))>?}i,
         :comment_on_github,
         command: true,
-        help: { "review https://github.com/user/repo/pull/123" => "adds comment to GH issue requesting review" },
+        help: { "review backend https://github.com/user/repo/pull/123" => "adds comment to GH issue requesting review from the next reviewer in the backend rotation" },
       )
 
       route(
         %r{review (?<team>.+) <?(?<url>(https?://)(?!github.com).*)>?}i,
         :mention_reviewer,
         command: true,
-        help: { "review http://some-non-github-url.com" => "requests review of the given URL in chat" }
+        help: { "review backend http://some-non-github-url.com" => "requests review by next reviewer in backend rotation of the given URL in chat" }
       )
 
       def create_team(response)
@@ -77,7 +65,7 @@ module Lita
         reviewers = response.match_data[:reviewers].split(', ')
 
         redis.rpush(review_team, reviewers)
-        response.reply("created team #{review_team} with reviewers #{reviewers}")
+        response.reply("created team #{review_team} with reviewers #{reviewers.join(', ')}")
       end
 
       def add_reviewer(response)
