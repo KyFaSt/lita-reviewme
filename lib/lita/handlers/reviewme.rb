@@ -6,7 +6,7 @@ module Lita
       REDIS_LIST = "reviewers"
 
       route(
-        /add (.+) to reviews/i,
+        /add (.+) to (.+)/i,
         :add_reviewer,
         command: true,
       )
@@ -83,8 +83,13 @@ module Lita
 
       def add_reviewer(response)
         reviewer = response.matches.flatten.first
-        redis.lpush(REDIS_LIST, reviewer)
-        response.reply("added #{reviewer} to reviews")
+        review_group = response.matches.flatten.last
+
+        if redis.rpushx(review_group, reviewer)
+          response.reply("added #{reviewer} to #{review_group}")
+        else
+          response.reply("did not add #{reviewer} to #{review_group}, #{review_group} does not exist")
+        end
       end
 
       def remove_reviewer(response)

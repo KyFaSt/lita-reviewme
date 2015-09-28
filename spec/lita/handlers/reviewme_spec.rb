@@ -17,10 +17,24 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
   let(:reply) { replies.last }
 
   describe "#add_reviewer" do
-    it "adds a name to the list" do
-      send_command("add iamvery to reviews")
+    describe "when the review group exists" do
+      before do
+        send_command("create group backend, reviewers: one, two, three")
+      end
 
-      expect(reply).to eq("added iamvery to reviews")
+      it "adds a name to the list" do
+        send_command("add iamvery to backend")
+
+        expect(reply).to eq("added iamvery to backend")
+      end
+    end
+
+    describe "when the review group does not exist" do
+      it "returns an error message" do
+        send_command("add kyfast to birds")
+
+        expect(reply).to eq("did not add kyfast to birds, birds does not exist")
+      end
     end
   end
 
