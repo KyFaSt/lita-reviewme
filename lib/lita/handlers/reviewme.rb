@@ -19,6 +19,13 @@ module Lita
       )
 
       route(
+        /create team (.+), reviewers: (.+)/i,
+        :create_team,
+        command: true,
+        help: { "create team backend, reviewers: iamvery, kyfast" => "creates review group named backend containing GitHub users iamvery and kyfast" },
+      )
+
+      route(
         /remove (.+) from reviews/i,
         :remove_reviewer,
         command: true,
@@ -39,7 +46,14 @@ module Lita
       )
 
       route(
-        /review me/i,
+        /teams/i,
+        :display_review_teams,
+        command: true,
+        help: { "teams" => "display list of review teams" },
+      )
+
+      route(
+        /review me (.+)/i,
         :generate_assignment,
         command: true,
         help: { "review me" => "responds with the next reviewer" },
@@ -59,6 +73,14 @@ module Lita
         help: { "review http://some-non-github-url.com" => "requests review of the given URL in chat" }
       )
 
+      def create_team(response)
+        review_team = response.matches.flatten.first
+        reviewers = response.matches.flatten.last.split(', ')
+
+        redis.rpush(review_team, reviewers)
+        response.reply("created team #{review_team} with reviewers #{reviewers}")
+      end
+
       def add_reviewer(response)
         reviewer = response.matches.flatten.first
         redis.lpush(REDIS_LIST, reviewer)
@@ -74,6 +96,11 @@ module Lita
       def display_reviewers(response)
         reviewers = redis.lrange(REDIS_LIST, 0, -1)
         response.reply(reviewers.join(', '))
+      end
+
+      def display_review_teams(response)
+        teams = redis.keys
+        response.reply(teams.join(', '))
       end
 
       def generate_assignment(response)

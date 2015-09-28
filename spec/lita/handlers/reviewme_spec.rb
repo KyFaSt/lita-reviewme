@@ -12,6 +12,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
   it { is_expected.to route_command("review https://github.com/user/repo/issues/123").to :comment_on_github }
   it { is_expected.to route_command("review https://bitbucket.org/user/repo/pull-requests/123").to :mention_reviewer }
   it { is_expected.to route_command("review <https://bitbucket.org/user/repo/pull-requests/123>").to :mention_reviewer }
+  it { is_expected.to route_command("create team backend, reviewers: iamvery, kyfast").to :create_team }
 
   let(:reply) { replies.last }
 
@@ -85,6 +86,16 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
       send_command("reviewers")
 
       expect(reply).to eq("zacstewart, iamvery")
+    end
+  end
+
+  describe "#display_review_teams" do
+    it "response with a list of groups" do
+      send_command("create team backend, reviewers: zacstewart, iamvery")
+      send_command("create team ninja turtles, reviewers: donatello, michaelangelo")
+      send_command("teams")
+
+      expect(reply).to eq("backend, ninja turtles")
     end
   end
 
