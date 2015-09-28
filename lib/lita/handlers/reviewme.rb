@@ -3,7 +3,6 @@ require 'octokit'
 module Lita
   module Handlers
     class Reviewme < Handler
-      REDIS_LIST = "reviewers"
 
       route(
         /add (.+) to (.+)/i,
@@ -26,7 +25,7 @@ module Lita
       )
 
       route(
-        /remove (.+) from reviews/i,
+        /remove (?<reviewer>.+) from (?<group>.+)/i,
         :remove_reviewer,
         command: true,
       )
@@ -94,7 +93,9 @@ module Lita
 
       def remove_reviewer(response)
         reviewer = response.matches.flatten.first
-        redis.lrem(REDIS_LIST, 0, reviewer)
+        review_group = response.matches.flatten.last
+
+        redis.lrem(review_group, 0, reviewer)
         response.reply("removed #{reviewer} from reviews")
       end
 
