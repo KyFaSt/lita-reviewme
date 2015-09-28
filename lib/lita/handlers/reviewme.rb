@@ -39,7 +39,7 @@ module Lita
       )
 
       route(
-        /reviewers/i,
+        /reviewers (.+)/i,
         :display_reviewers,
         command: true,
         help: { "reviewers" => "display list of reviewers" },
@@ -60,14 +60,14 @@ module Lita
       )
 
       route(
-        %r{review <?(?<url>(https://)?github.com/(?<repo>.+)/(pull|issues)/(?<id>\d+))>?}i,
+        %r{review (?<group>.+) <?(?<url>(https://)?github.com/(?<repo>.+)/(pull|issues)/(?<id>\d+))>?}i,
         :comment_on_github,
         command: true,
         help: { "review https://github.com/user/repo/pull/123" => "adds comment to GH issue requesting review" },
       )
 
       route(
-        %r{review <?(https?://(?!github.com).*)>?}i,
+        %r{review (?<group>.+) <?(?<url>(https?://)(?!github.com).*)>?}i,
         :mention_reviewer,
         command: true,
         help: { "review http://some-non-github-url.com" => "requests review of the given URL in chat" }
@@ -99,7 +99,8 @@ module Lita
       end
 
       def display_reviewers(response)
-        reviewers = redis.lrange(REDIS_LIST, 0, -1)
+        review_group = response.matches.flatten.first
+        reviewers = redis.lrange(review_group, 0, -1)
         response.reply(reviewers.join(', '))
       end
 
@@ -109,14 +110,17 @@ module Lita
       end
 
       def generate_assignment(response)
-        reviewer = next_reviewer
+        review_group = response.matches.flatten.first
+        reviewer = next_reviewer(review_group)
         response.reply(reviewer.to_s)
       end
 
       def comment_on_github(response)
         repo = response.match_data[:repo]
         id = response.match_data[:id]
-        reviewer = next_reviewer
+        review_group = response.match_data[:group]
+
+        reviewer = next_reviewer(review_group)
         comment = github_comment(reviewer)
 
         begin
@@ -129,15 +133,17 @@ module Lita
       end
 
       def mention_reviewer(response)
-        url = response.matches.flatten.first
-        reviewer = next_reviewer
+        url = response.match_data[:url]
+        review_group = response.match_data[:group]
+        reviewer = next_reviewer(review_group)
+
         response.reply(chat_mention(reviewer, url))
       end
 
       private
 
-      def next_reviewer
-        redis.rpoplpush(REDIS_LIST, REDIS_LIST)
+      def next_reviewer(review_group)
+        redis.rpoplpush(review_group, review_group)
       end
 
       def github_comment(reviewer)
