@@ -29,7 +29,7 @@ module Lita
         /reviewers (?<team>.+)/i,
         :display_reviewers,
         command: true,
-        help: { "reviewers backend" => "display list of reviewers in backend group" },
+        help: { "reviewers backend" => "display list of reviewers in backend team" },
       )
 
       route(

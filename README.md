@@ -25,14 +25,14 @@ ENV["GITHUB_WOLFBRAIN_ACCESS_TOKEN"]
 
 ## Usage
 
-### Add a review group
+### Add a review team
 
 > **Kylie S.** Nerdbot: create backend, reviewers: iamvery, zacstewart
 >
-> **Nerdbot** created group backend with reviewers iamvery, zacstewart
+> **Nerdbot** created team backend with reviewers iamvery, zacstewart
 
 
-### See who is in a group's review rotation.
+### See who is in a team's review rotation.
 
 > **Jay H.** Nerdbot: reviewers backend
 >
