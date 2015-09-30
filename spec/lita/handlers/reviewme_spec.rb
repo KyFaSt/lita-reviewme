@@ -3,21 +3,21 @@ require "spec_helper"
 describe Lita::Handlers::Reviewme, lita_handler: true do
   it { is_expected.to route_command("add iamvery to reviews").to :add_reviewer }
   it { is_expected.to route_command("remove iamvery from reviews").to :remove_reviewer }
-  it { is_expected.to route_command("reviewers review_group").to :display_reviewers }
-  it { is_expected.to route_command("review me review_group").to :generate_assignment }
-  it { is_expected.to route_command("review review_group https://github.com/user/repo/pull/123").to :comment_on_github }
-  it { is_expected.to route_command("review review_group <https://github.com/user/repo/pull/123>").to :comment_on_github }
-  it { is_expected.to route_command("review review_group https://github.com/user/repo/issues/123").to :comment_on_github }
-  it { is_expected.to route_command("review review_group https://bitbucket.org/user/repo/pull-requests/123").to :mention_reviewer }
-  it { is_expected.to route_command("review review_group <https://bitbucket.org/user/repo/pull-requests/123>").to :mention_reviewer }
+  it { is_expected.to route_command("reviewers review_team").to :display_reviewers }
+  it { is_expected.to route_command("review me review_team").to :generate_assignment }
+  it { is_expected.to route_command("review review_team https://github.com/user/repo/pull/123").to :comment_on_github }
+  it { is_expected.to route_command("review review_team <https://github.com/user/repo/pull/123>").to :comment_on_github }
+  it { is_expected.to route_command("review review_team https://github.com/user/repo/issues/123").to :comment_on_github }
+  it { is_expected.to route_command("review review_team https://bitbucket.org/user/repo/pull-requests/123").to :mention_reviewer }
+  it { is_expected.to route_command("review review_team <https://bitbucket.org/user/repo/pull-requests/123>").to :mention_reviewer }
   it { is_expected.to route_command("create team backend, reviewers: iamvery, kyfast").to :create_team }
 
   let(:reply) { replies.last }
 
   describe "#add_reviewer" do
-    describe "when the review group exists" do
+    describe "when the review team exists" do
       before do
-        send_command("create group backend, reviewers: one, two, three")
+        send_command("create team backend, reviewers: one, two, three")
       end
 
       it "adds a name to the list" do
@@ -27,7 +27,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
       end
     end
 
-    describe "when the review group does not exist" do
+    describe "when the review team does not exist" do
       it "returns an error message" do
         send_command("add kyfast to birds")
 
@@ -46,7 +46,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
 
   describe "#generate_assignment" do
     it "responds with the next reviewer's name" do
-      send_command("create group backend, reviewers: kyfast, iamvery")
+      send_command("create team backend, reviewers: kyfast, iamvery")
 
       send_command("review me backend")
 
@@ -54,7 +54,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
     end
 
     it "rotates the response each time" do
-      send_command("create group backend, reviewers: kyfast, iamvery")
+      send_command("create team backend, reviewers: kyfast, iamvery")
 
       send_command("review me backend")
       expect(replies.last).to eq("iamvery")
@@ -66,7 +66,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
 
   describe "#comment_on_github" do
     before do
-      send_command("create group backend, reviewers: kyfast, iamvery")
+      send_command("create team backend, reviewers: kyfast, iamvery")
     end
 
     it "posts comment on github" do
@@ -88,7 +88,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
       url = "https://github.com/iamvery/lita-reviewme/pull/5"
 
 
-      send_command("create group backend, reviewers: zacstewart, iamvery")
+      send_command("create team backend, reviewers: zacstewart, iamvery")
       send_command("review backend #{url}")
 
       expect(replies.last).to eq("I couldn't post a comment. (Are the permissions right?) iamvery: :eyes: #{url}")
@@ -97,7 +97,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
 
   describe "#display_reviewers" do
     it "responds with list of reviewers" do
-      send_command("create group backend, reviewers: zacstewart, iamvery")
+      send_command("create team backend, reviewers: zacstewart, iamvery")
       send_command("reviewers backend")
 
       expect(reply).to eq("zacstewart, iamvery")
@@ -105,7 +105,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
   end
 
   describe "#display_review_teams" do
-    it "response with a list of groups" do
+    it "response with a list of teams" do
       send_command("create team backend, reviewers: zacstewart, iamvery")
       send_command("create team ninja turtles, reviewers: donatello, michaelangelo")
       send_command("teams")
@@ -116,7 +116,7 @@ describe Lita::Handlers::Reviewme, lita_handler: true do
 
   describe "#mention_reviewer" do
     it "mentions a reviewer in chat with the given URL" do
-      send_command("create group backend, reviewers: zacstewart, iamvery")
+      send_command("create team backend, reviewers: zacstewart, iamvery")
 
       send_command("review backend https://bitbucket.org/user/repo/pull-requests/123")
       expect(replies.last).to eq("iamvery: :eyes: https://bitbucket.org/user/repo/pull-requests/123")
